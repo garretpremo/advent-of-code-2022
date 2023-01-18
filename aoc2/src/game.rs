@@ -1,18 +1,45 @@
+use crate::game::Code::{A, B, C, X, Y, Z};
 use crate::game::Move::{PAPER, ROCK, SCISSORS};
 use crate::game::Result::{DRAW, LOSS, WIN};
 
+pub enum Code { A, B, C, X, Y, Z }
 pub enum Move { ROCK, PAPER, SCISSORS }
 #[derive(Debug)]
 pub enum Result { WIN, LOSS, DRAW }
 
-impl Move {
-    pub fn from(input: char) -> Move {
+impl Code {
+    pub fn from(input: char) -> Code {
         match input {
-            'A' | 'X' => ROCK,
-            'B' | 'Y' => PAPER,
-            'C' | 'Z' => SCISSORS,
-            _ => panic!("invalid RPS input")
+            'A' => A,
+            'B' => B,
+            'C' => C,
+            'X' => X,
+            'Y' => Y,
+            'Z' => Z,
+            _ => panic!("invalid code")
         }
+    }
+
+    pub fn to_move(&self) -> Move {
+        match self {
+            A | X => ROCK,
+            B | Y => PAPER,
+            C | Z => SCISSORS,
+        }
+    }
+}
+
+impl Move {
+    pub fn get_losing_move(other: &Move) -> Move {
+        match other { ROCK => SCISSORS, PAPER => ROCK, SCISSORS => PAPER }
+    }
+
+    pub fn get_winning_move(other: &Move) -> Move {
+        match other { ROCK => PAPER, PAPER => SCISSORS, SCISSORS => ROCK }
+    }
+
+    pub fn get_draw(other: &Move) -> Move {
+        match other { ROCK => ROCK, PAPER => PAPER, SCISSORS => SCISSORS }
     }
 
     pub fn score(&self) -> u32 {
@@ -29,9 +56,7 @@ impl Result {
 impl PartialEq for Result {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (WIN, WIN) => true,
-            (DRAW, DRAW) => true,
-            (LOSS, LOSS) => true,
+            (WIN, WIN) | (DRAW, DRAW) | (LOSS, LOSS) => true,
             _ => false
         }
     }
@@ -42,16 +67,27 @@ pub struct Hand {
     pub my_move: Move
 }
 
+#[allow(dead_code)]
 impl Hand {
-    pub fn from_chars(your_move: char, my_move: char) -> Hand {
-        Hand {
-            your_move: Move::from(your_move),
-            my_move: Move::from(my_move)
-        }
-    }
-
     pub fn from_moves(your_move: Move, my_move: Move) -> Hand {
         Hand { your_move, my_move }
+    }
+
+    pub fn from_codes(first_code: &Code, second_code: &Code, part_2: bool) -> Hand {
+        if !part_2 {
+            return Hand::from_moves(first_code.to_move(), second_code.to_move())
+        }
+
+        let your_move = first_code.to_move();
+
+        let my_move = match second_code {
+            X => Move::get_losing_move(&your_move),
+            Y => Move::get_draw(&your_move),
+            Z => Move::get_winning_move(&your_move),
+            _ => panic!("invalid second code")
+        };
+
+        Hand::from_moves(your_move, my_move)
     }
 
     pub fn score(&self) -> u32 {
