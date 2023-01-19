@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Rucksack {
     compartment_one: HashSet<char>,
     compartment_two: HashSet<char>
@@ -18,5 +18,9 @@ impl Rucksack {
         let common_items: Vec<&char> = self.compartment_one.intersection(&self.compartment_two).collect();
         assert_eq!(common_items.len(), 1);
         *common_items[0]
+    }
+
+    pub fn get_all_items(&self) -> HashSet<char> {
+        self.compartment_one.union(&self.compartment_two).copied().collect()
     }
 }
