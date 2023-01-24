@@ -16,22 +16,30 @@ struct Maneuver {
 
 impl Cargo {
     // public function is immutable, so that the original data is not mutated
-    pub fn move_crates(&self) -> Cargo {
+    pub fn move_crates(&self, keep_order: bool) -> Cargo {
         let mut cargo = self.clone();
 
-        cargo.do_move_crates();
+        cargo.do_move_crates(keep_order);
 
         cargo
     }
 
-    fn do_move_crates(&mut self) {
+    fn do_move_crates(&mut self, keep_order: bool) {
         self.maneuvers.iter()
             .for_each(|maneuver| {
-                for _ in 0..maneuver.moving {
-                    let moving_crate = self.stacks[maneuver.from - 1].pop_front().unwrap();
+                let mut crates = vec![];
 
-                    self.stacks[maneuver.to - 1].push_front(moving_crate);
+                for _ in 0..maneuver.moving {
+                    crates.push(self.stacks[maneuver.from - 1].pop_front().unwrap());
                 }
+
+                if keep_order {
+                    crates.reverse();
+                }
+
+                crates.into_iter().for_each(|_crate| {
+                    self.stacks[maneuver.to - 1].push_front(_crate);
+                });
             });
 
         self.maneuvers = vec![];
