@@ -4,6 +4,7 @@ fn main() {
     let input = parse_input_file("inputs/input6.txt");
 
     println!("6.1 answer: {}", find_first_marker(&input, 4));
+    println!("6.2 answer: {}", find_first_marker(&input, 14));
 }
 
 #[test]
